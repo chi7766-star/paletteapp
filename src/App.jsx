@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import html2canvas from "html2canvas";
 
 const PALETTE_ITEMS = {
   balm:       { id: "balm",       name: "潤いバーム",        color: "#D4A574", emoji: "✨", desc: "乾燥・くすみに" },
@@ -75,6 +76,11 @@ const s = {
     width: "100%", padding: "14px 0", borderRadius: 14, border: "1.5px solid " + C.border,
     background: "transparent", color: C.muted, fontSize: 13, cursor: "pointer",
   },
+  saveBtn: {
+    width: "100%", padding: "15px 0", borderRadius: 14, border: "2px solid " + C.skin,
+    background: "#fff", color: C.skin, fontSize: 15, fontWeight: 700, cursor: "pointer",
+    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+  },
   hint: { fontSize: 11, color: C.muted, textAlign: "center", margin: 0 },
   imgFrame: { borderRadius: 20, overflow: "hidden", background: C.skinPale, aspectRatio: "3/4", position: "relative" },
   img: { width: "100%", height: "100%", objectFit: "cover" },
@@ -105,6 +111,8 @@ const s = {
   cardBody: { marginTop: 14, paddingTop: 14, borderTop: "1px solid " + C.border },
   areaTag: { fontSize: 11, color: C.skin, marginBottom: 8 },
   howText: { fontSize: 13, lineHeight: 1.7, color: C.text, margin: 0 },
+  saveArea: { background: C.bg, borderRadius: 16, padding: 4 },
+  saveFooter: { textAlign: "center", fontSize: 10, color: C.muted, letterSpacing: "0.15em", marginTop: 8 },
 };
 
 export default function PaletteApp() {
@@ -193,12 +201,8 @@ function HomeScreen({ onCapture, onSkip }) {
         ))}
       </div>
       <div style={s.btnGroup}>
-        <button style={s.primaryBtn} onClick={onCapture}>
-          <span>📷</span><span>今の肌を撮る</span>
-        </button>
-        <button style={s.ghostBtn} onClick={onSkip}>
-          写真なしで診断する（外回り帰りOLモード）
-        </button>
+        <button style={s.primaryBtn} onClick={onCapture}><span>📷</span><span>今の肌を撮る</span></button>
+        <button style={s.ghostBtn} onClick={onSkip}>写真なしで診断する（外回り帰りOLモード）</button>
       </div>
       <p style={s.hint}>写真はAI診断のみに使用し、保存されません</p>
     </div>
@@ -220,9 +224,7 @@ function PreviewScreen({ image, onAnalyze, onRetake }) {
         }
       </div>
       <div style={s.btnGroup}>
-        <button style={s.primaryBtn} onClick={onAnalyze}>
-          <span>✨</span><span>診断スタート</span>
-        </button>
+        <button style={s.primaryBtn} onClick={onAnalyze}><span>✨</span><span>診断スタート</span></button>
         <button style={s.ghostBtn} onClick={onRetake}>撮り直す</button>
       </div>
     </div>
@@ -239,9 +241,7 @@ function AnalyzingScreen() {
       <h2 style={s.subtitle}>診断中...</h2>
       <p style={{ color: C.muted, fontSize: 13 }}>肌状態を解析しています</p>
       <div style={s.dots}>
-        {[0,1,2].map(i => (
-          <span key={i} style={{ ...s.dot, animationDelay: (i * 0.25) + "s" }} />
-        ))}
+        {[0,1,2].map(i => <span key={i} style={{ ...s.dot, animationDelay: (i*0.25)+"s" }} />)}
       </div>
     </div>
   );
@@ -249,52 +249,83 @@ function AnalyzingScreen() {
 
 function ResultScreen({ result, onReset }) {
   const [open, setOpen] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const cardRef = useRef(null);
+
+  const handleSave = useCallback(async () => {
+    if (!cardRef.current) return;
+    setSaving(true);
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: "#FAF8F5",
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement("a");
+      link.download = `nuance-palette-${Date.now()}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (e) {
+      alert("保存に失敗しました。もう一度お試しください。");
+    } finally {
+      setSaving(false);
+    }
+  }, []);
+
   return (
     <div style={s.page}>
-      <div style={s.badge}>
-        <span style={s.badgeText}>{result.skinCondition}</span>
-      </div>
-      <div style={s.pillRow}>
-        {result.concerns.map((c, i) => (
-          <div key={i} style={s.pill}><span style={s.pillDot} />{c}</div>
-        ))}
-      </div>
-      <p style={s.message}>"{result.message}"</p>
-      <div style={s.divRow}>
-        <div style={s.divLine} />
-        <span style={s.divLabel}>あなたへのケア提案</span>
-        <div style={s.divLine} />
-      </div>
-      <div style={s.cards}>
-        {result.recommendations.map((rec, i) => {
-          const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
-          const isOpen = open === i;
-          return (
-            <div key={i}
-              style={{ ...s.card, borderColor: isOpen ? item.color : "#EDE5DE", background: isOpen ? item.color + "15" : "#fff" }}
-              onClick={() => setOpen(isOpen ? null : i)}
-            >
-              <div style={s.cardRow}>
-                <div style={{ ...s.cardIcon, background: item.color }}>
-                  <span style={{ fontSize: 18 }}>{item.emoji}</span>
+      <div ref={cardRef} style={s.saveArea}>
+        <div style={s.badge}>
+          <span style={s.badgeText}>{result.skinCondition}</span>
+        </div>
+        <div style={{ ...s.pillRow, marginTop: 16 }}>
+          {result.concerns.map((c, i) => (
+            <div key={i} style={s.pill}><span style={s.pillDot} />{c}</div>
+          ))}
+        </div>
+        <p style={{ ...s.message, marginTop: 16 }}>"{result.message}"</p>
+        <div style={{ ...s.divRow, marginTop: 16 }}>
+          <div style={s.divLine} />
+          <span style={s.divLabel}>あなたへのケア提案</span>
+          <div style={s.divLine} />
+        </div>
+        <div style={{ ...s.cards, marginTop: 16 }}>
+          {result.recommendations.map((rec, i) => {
+            const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
+            const isOpen = open === i;
+            return (
+              <div key={i}
+                style={{ ...s.card, borderColor: isOpen ? item.color : C.border, background: isOpen ? item.color + "15" : "#fff" }}
+                onClick={() => setOpen(isOpen ? null : i)}
+              >
+                <div style={s.cardRow}>
+                  <div style={{ ...s.cardIcon, background: item.color }}>
+                    <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                  </div>
+                  <div style={s.cardMeta}>
+                    <span style={s.cardStep}>STEP {rec.priority}</span>
+                    <span style={s.cardName}>{item.name}</span>
+                    <span style={s.cardDesc}>{item.desc}</span>
+                  </div>
+                  <span style={{ ...s.arrow, transform: isOpen ? "rotate(90deg)" : "none" }}>›</span>
                 </div>
-                <div style={s.cardMeta}>
-                  <span style={s.cardStep}>STEP {rec.priority}</span>
-                  <span style={s.cardName}>{item.name}</span>
-                  <span style={s.cardDesc}>{item.desc}</span>
-                </div>
-                <span style={{ ...s.arrow, transform: isOpen ? "rotate(90deg)" : "none" }}>›</span>
+                {isOpen && (
+                  <div style={s.cardBody}>
+                    <div style={s.areaTag}>📍 {rec.area}</div>
+                    <p style={s.howText}>{rec.how}</p>
+                  </div>
+                )}
               </div>
-              {isOpen && (
-                <div style={s.cardBody}>
-                  <div style={s.areaTag}>📍 {rec.area}</div>
-                  <p style={s.howText}>{rec.how}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        <p style={s.saveFooter}>nuance palette — 肌悩み診断</p>
       </div>
+
+      <button style={s.saveBtn} onClick={handleSave} disabled={saving}>
+        <span>{saving ? "⏳" : "📥"}</span>
+        <span>{saving ? "保存中..." : "診断結果を画像保存"}</span>
+      </button>
       <button style={s.primaryBtn} onClick={onReset}>もう一度診断する</button>
     </div>
   );
