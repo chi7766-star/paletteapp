@@ -77,7 +77,7 @@ const s = {
   },
   hint: { fontSize: 11, color: C.muted, textAlign: "center", margin: 0 },
   imgFrame: { borderRadius: 20, overflow: "hidden", background: C.skinPale, aspectRatio: "3/4", position: "relative" },
-  img: { width: "100%", height: "100%", objectFit: "cover" },
+  img: { width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" },
   noImg: { width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, boxSizing: "border-box" },
   pulseWrap: { position: "relative", width: 90, height: 90, display: "flex", alignItems: "center", justifyContent: "center" },
   pulseRing: { position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid " + C.skin, animation: "pulse 1.8s ease-in-out infinite" },
