@@ -160,7 +160,7 @@ export default function PaletteApp() {
         {phase === "analyzing" && <AnalyzingScreen />}
         {phase === "result"    && result && <ResultScreen result={result} onReset={reset} />}
       </main>
-      <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleImageSelect} style={{ display: "none" }} />
+      <input ref={fileInputRef} type="file" accept="image/*" capture="user" onChange={handleImageSelect} style={{ display: "none" }} />
     </div>
   );
 }
