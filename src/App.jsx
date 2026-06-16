@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import logo from "./logo.png.jpg";
 import html2canvas from "html2canvas";
 
 const PALETTE_ITEMS = {
@@ -116,7 +117,7 @@ const s = {
 };
 
 export default function PaletteApp() {
-  const [phase, setPhase] = useState("home");
+  const [phase, setPhase] = useState("splash");
   const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
   const fileInputRef = useRef(null);
@@ -157,6 +158,11 @@ export default function PaletteApp() {
     }, 1800);
   }, []);
 
+    useEffect(() => {
+    if (phase === "splash") {
+      setTimeout(() => setPhase("home"), 2500);
+    }
+  }, [phase]);
   const reset = () => {
     setPhase("home");
     setImageData(null);
@@ -174,6 +180,7 @@ export default function PaletteApp() {
         <span style={s.logoSub}>palette</span>
       </header>
       <main style={s.main}>
+      {phase === "splash" && <SplashScreen />}
         {phase === "home"      && <HomeScreen onCapture={() => fileInputRef.current.click()} onSkip={goToPreview} />}
         {phase === "preview"   && <PreviewScreen image={imageData} onAnalyze={analyze} onRetake={() => fileInputRef.current.click()} />}
         {phase === "analyzing" && <AnalyzingScreen />}
@@ -184,6 +191,23 @@ export default function PaletteApp() {
   );
 }
 
+function SplashScreen() {
+  return (
+    <div style={{
+      position: "fixed", inset: 0,
+      background: "#EDE5DC",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      zIndex: 9999,
+    }}>
+      <img src={logo} alt="Re:Touch" style={{ 
+        width: "80%", maxWidth: 320,
+        animation: "fadeIn 1.5s ease-in-out",
+      }} />
+      <style>{`@keyframes fadeIn { from{opacity:0} to{opacity:1} }`}</style>
+    </div>
+  );
+}
 function HomeScreen({ onCapture, onSkip }) {
   return (
     <div style={s.page}>
@@ -202,7 +226,7 @@ function HomeScreen({ onCapture, onSkip }) {
       </div>
       <div style={s.btnGroup}>
         <button style={s.primaryBtn} onClick={onCapture}><span>📷</span><span>今の肌を撮る</span></button>
-        <button style={s.ghostBtn} onClick={onSkip}>写真なしで診断する（外回り帰りOLモード）</button>
+        <button style={s.ghostBtn} onClick={onSkip}>写真なしで診断する</button>
       </div>
       <p style={s.hint}>写真はAI診断のみに使用し、保存されません</p>
     </div>
@@ -257,7 +281,7 @@ function ResultScreen({ result, onReset }) {
     setSaving(true);
     try {
       const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F3EADD",
         scale: 2,
         useCORS: true,
       });
