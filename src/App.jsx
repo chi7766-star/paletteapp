@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import logo from "./logo.png.jpg";
+import face from "./face.jpg";
 import html2canvas from "html2canvas";
 
 const PALETTE_ITEMS = {
@@ -15,19 +16,20 @@ const MOCK_RESULTS = [
     concerns: ["Tゾーンのテカリ", "マスクでヨレたチーク", "毛穴が目立つ"],
     message: "あと少し！肌をリセットして夜まで乗り切ろう",
     recommendations: [
-      { itemId: "powder",     priority: 1, area: "Tゾーン・小鼻まわり", how: "ブラシで軽くのせてテカリをオフ。重ねすぎず薄くが鉄則" },
-      { itemId: "correction", priority: 2, area: "頬・あご",             how: "指先で軽くなじませてヨレたベースをなめらかに整える" },
-      { itemId: "balm",       priority: 3, area: "目元・口元",           how: "乾燥が気になる部分に少量のせてツヤを復活させて" },
+      { itemId: "powder",     priority: 1, area: "Tゾーン・小鼻まわり", how: "ブラシで軽くのせてテカリをオフ。重ねすぎず薄くが鉄則", x: 50, y: 38 },
+      { itemId: "correction", priority: 2, area: "頬・あご",             how: "指先で軽くなじませてヨレたベースをなめらかに整える", x: 30, y: 58 },
+      { itemId: "balm",       priority: 3, area: "目元・口元",           how: "乾燥が気になる部分に少量のせてツヤを復活させて", x: 50, y: 70 },
     ],
   },
+
   {
     skinCondition: "乾燥でくすみが出やすいタイミング",
     concerns: ["頬の乾燥・粉っぽさ", "くすんで見える", "口元のよれ"],
     message: "潤いを足せば、ぐっと明るく見えるはず",
     recommendations: [
-      { itemId: "balm",       priority: 1, area: "頬・目元・口元",       how: "指の温かみで少量を溶かしながら押さえるようになじませて" },
-      { itemId: "tone",       priority: 2, area: "頬骨・額",             how: "くすみが気になる部分に薄く重ねてトーンを補正" },
-      { itemId: "powder",     priority: 3, area: "小鼻・あご",           how: "皮脂が出やすい部分だけピンポイントで軽くおさえる" },
+      { itemId: "balm",       priority: 1, area: "頬・目元・口元",       how: "指の温かみで少量を溶かしながら押さえるようになじませて", x: 35, y: 45 },
+      { itemId: "tone",       priority: 2, area: "頬骨・額",             how: "くすみが気になる部分に薄く重ねてトーンを補正", x: 65, y: 30 },
+      { itemId: "powder",     priority: 3, area: "小鼻・あご",           how: "皮脂が出やすい部分だけピンポイントで軽くおさえる", x: 50, y: 65 },
     ],
   },
   {
@@ -35,9 +37,9 @@ const MOCK_RESULTS = [
     concerns: ["頬の色ムラ・赤み", "毛穴が目立つ", "全体的くすみ"],
     message: "2ステップでOK。難しく考えないで",
     recommendations: [
-      { itemId: "tone",       priority: 1, area: "赤みが出やすい頬",       how: "コンシーラー感覚で薄く重ねて色ムラをトーンダウン" },
-      { itemId: "powder",     priority: 2, area: "鼻・毛穴が気になる部分", how: "毛穴をぼかすようにブラシでくるくると軽くのせる" },
-      { itemId: "correction", priority: 3, area: "全体",                   how: "仕上げに指でさっとなじませてメイクをまとめる" },
+      { itemId: "tone",       priority: 1, area: "赤みが出やすい頬",       how: "コンシーラー感覚で薄く重ねて色ムラをトーンダウン", x: 28, y: 50 },
+      { itemId: "powder",     priority: 2, area: "鼻・毛穴が気になる部分", how: "毛穴をぼかすようにブラシでくるくると軽くのせる", x: 50, y: 60 },
+      { itemId: "correction", priority: 3, area: "全体",                   how: "仕上げに指でさっとなじませてメイクをまとめる", x: 50, y: 80 },
     ],
   },
 ];
@@ -298,6 +300,27 @@ function ResultScreen({ result, onReset }) {
 
   return (
     <div style={s.page}>
+              <div style={{ position: "relative", width: "70%", margin: "0 auto", marginBottom: 20 }}>
+          <img src={face} alt="face" style={{ width: "100%", display: "block" }} />
+          {result.recommendations.map((rec, i) => {
+            const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
+            return (
+              <div key={i} style={{
+                position: "absolute",
+                left: rec.x + "%", top: rec.y + "%",
+                transform: "translate(-50%, -50%)",
+                width: 28, height: 28, borderRadius: "50%",
+                background: item.color,
+                border: "2px solid white",
+                boxShadow: "0 2px 8px rgba(0,0,0,.2)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 13,
+              }}>
+                {rec.priority}
+              </div>
+            );
+          })}
+        </div>
       <div ref={cardRef} style={s.saveArea}>
         <div style={s.badge}>
           <span style={s.badgeText}>{result.skinCondition}</span>
