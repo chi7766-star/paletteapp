@@ -103,6 +103,14 @@ const MOCK_RESULTS = [
   },
 ];
 
+function getSkinForecast() {
+  const month = new Date().getMonth() + 1;
+  if (month >= 6 && month <= 8) return { emoji: "☀️", label: "高温多湿・汗テカリ注意", level: "high", advice: "汗と皮脂でメイクが崩れやすい季節。毛穴ぼかしパウダーを先にポーチに入れて", color: "#FF8C42", bg: "#FFF3E8" };
+  if (month >= 3 && month <= 5) return { emoji: "🌸", label: "花粉・湿度変化に注意", level: "mid", advice: "花粉で肌がゆらぎやすい時期。潤いバームで肌バリアを整えてから外出を", color: "#E8A0BF", bg: "#FFF0F5" };
+  if (month >= 9 && month <= 11) return { emoji: "🍂", label: "乾燥はじまり・保湿ケアを", level: "mid", advice: "朝晩の乾燥が急に進む季節。潤いバームをいつもより多めにのせて", color: "#C4987A", bg: "#FDF3EC" };
+  return { emoji: "❄️", label: "極乾燥・保湿必須", level: "high", advice: "空気が乾燥しきってる時期。ヨレ補正クリームで崩れ予防しながら保湿も忘れずに", color: "#7BA7CC", bg: "#EEF5FC" };
+}
+
 const C = {
   bg: "#FAF8F5", surface: "#FFF", border: "#EDE5DE",
   skin: "#C4987A", skinLight: "#E8DDD4", skinPale: "#F5EDE8",
@@ -128,25 +136,10 @@ const s = {
   chipEmoji: { fontSize: 20 },
   chipName: { fontSize: 12, fontWeight: 600, color: "#fff", textShadow: "0 1px 3px rgba(0,0,0,.25)" },
   btnGroup: { display: "flex", flexDirection: "column", gap: 10 },
-  primaryBtn: {
-    width: "100%", padding: "16px 0", borderRadius: 14, border: "none",
-    background: "linear-gradient(135deg," + C.skin + "," + C.accent + ")",
-    color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer",
-    display: "flex", alignItems: "center", justifyContent: "center", gap: 8, letterSpacing: "0.06em",
-  },
-  ghostBtn: {
-    width: "100%", padding: "14px 0", borderRadius: 14, border: "1.5px solid " + C.border,
-    background: "transparent", color: C.muted, fontSize: 13, cursor: "pointer",
-  },
-  saveBtn: {
-    width: "100%", padding: "15px 0", borderRadius: 14, border: "2px solid " + C.skin,
-    background: "#fff", color: C.skin, fontSize: 15, fontWeight: 700, cursor: "pointer",
-    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-  },
-  historyBtn: {
-    padding: "8px 14px", borderRadius: 20, border: "1.5px solid " + C.border,
-    background: "transparent", color: C.muted, fontSize: 12, cursor: "pointer",
-  },
+  primaryBtn: { width: "100%", padding: "16px 0", borderRadius: 14, border: "none", background: "linear-gradient(135deg," + C.skin + "," + C.accent + ")", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, letterSpacing: "0.06em" },
+  ghostBtn: { width: "100%", padding: "14px 0", borderRadius: 14, border: "1.5px solid " + C.border, background: "transparent", color: C.muted, fontSize: 13, cursor: "pointer" },
+  saveBtn: { width: "100%", padding: "15px 0", borderRadius: 14, border: "2px solid " + C.skin, background: "#fff", color: C.skin, fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
+  historyBtn: { padding: "8px 14px", borderRadius: 20, border: "1.5px solid " + C.border, background: "transparent", color: C.muted, fontSize: 12, cursor: "pointer" },
   hint: { fontSize: 11, color: C.muted, textAlign: "center", margin: 0 },
   imgFrame: { borderRadius: 20, overflow: "hidden", background: C.skinPale, aspectRatio: "3/4", position: "relative" },
   img: { width: "100%", height: "100%", objectFit: "cover" },
@@ -181,17 +174,13 @@ const s = {
   saveFooter: { textAlign: "center", fontSize: 10, color: C.muted, letterSpacing: "0.15em", marginTop: 8 },
 };
 
-// 履歴をlocalStorageに保存・取得
 function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem("nuance_history") || "[]");
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem("nuance_history") || "[]"); }
+  catch { return []; }
 }
 function saveHistory(history) {
   localStorage.setItem("nuance_history", JSON.stringify(history));
-}
-
-export default function PaletteApp() {
+}export default function PaletteApp() {
   const [phase, setPhase] = useState("splash");
   const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
@@ -230,13 +219,7 @@ export default function PaletteApp() {
     setTimeout(() => {
       const mock = MOCK_RESULTS[Math.floor(Math.random() * MOCK_RESULTS.length)];
       setResult(mock);
-      // 履歴に追加
-      const newEntry = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        skinCondition: mock.skinCondition,
-        concerns: mock.concerns,
-      };
+      const newEntry = { id: Date.now(), date: new Date().toISOString(), skinCondition: mock.skinCondition, concerns: mock.concerns };
       const newHistory = [newEntry, ...loadHistory()].slice(0, 50);
       saveHistory(newHistory);
       setHistory(newHistory);
@@ -245,16 +228,10 @@ export default function PaletteApp() {
   }, []);
 
   useEffect(() => {
-    if (phase === "splash") {
-      setTimeout(() => setPhase("home"), 2500);
-    }
+    if (phase === "splash") setTimeout(() => setPhase("home"), 2500);
   }, [phase]);
 
-  const reset = () => {
-    setPhase("home");
-    setImageData(null);
-    setResult(null);
-  };
+  const reset = () => { setPhase("home"); setImageData(null); setResult(null); };
 
   return (
     <div style={s.root}>
@@ -272,12 +249,12 @@ export default function PaletteApp() {
         )}
       </header>
       <main style={s.main}>
-        {phase === "splash"   && <SplashScreen />}
-        {phase === "home"     && <HomeScreen onCapture={() => fileInputRef.current.click()} onSkip={goToPreview} />}
-        {phase === "preview"  && <PreviewScreen image={imageData} onAnalyze={analyze} onRetake={() => fileInputRef.current.click()} />}
-        {phase === "analyzing"&& <AnalyzingScreen />}
-        {phase === "result"   && result && <ResultScreen result={result} onReset={reset} />}
-        {phase === "history"  && <HistoryScreen history={history} onBack={() => setPhase("home")} />}
+        {phase === "splash"    && <SplashScreen />}
+        {phase === "home"      && <HomeScreen onCapture={() => fileInputRef.current.click()} onSkip={goToPreview} />}
+        {phase === "preview"   && <PreviewScreen image={imageData} onAnalyze={analyze} onRetake={() => fileInputRef.current.click()} />}
+        {phase === "analyzing" && <AnalyzingScreen />}
+        {phase === "result"    && result && <ResultScreen result={result} onReset={reset} />}
+        {phase === "history"   && <HistoryScreen history={history} onBack={() => setPhase("home")} />}
       </main>
       <input ref={fileInputRef} type="file" accept="image/*" capture="user" onChange={handleImageSelect} style={{ display: "none" }} />
     </div>
@@ -286,11 +263,7 @@ export default function PaletteApp() {
 
 function SplashScreen() {
   return (
-    <div style={{
-      position: "fixed", inset: 0, background: "#EDE5DC",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center", zIndex: 9999,
-    }}>
+    <div style={{ position: "fixed", inset: 0, background: "#EDE5DC", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
       <img src={logo} alt="nuance palette" style={{ width: "80%", maxWidth: 320, animation: "fadeIn 1.5s ease-in-out" }} />
       <style>{`@keyframes fadeIn { from{opacity:0} to{opacity:1} }`}</style>
     </div>
@@ -298,8 +271,26 @@ function SplashScreen() {
 }
 
 function HomeScreen({ onCapture, onSkip }) {
+  const forecast = getSkinForecast();
+  const levelColor = forecast.level === "high" ? "#E05C5C" : "#E8A84A";
+  const levelLabel = forecast.level === "high" ? "要注意" : "注意";
   return (
     <div style={s.page}>
+      <div style={{ background: forecast.bg, borderRadius: 16, padding: 16, border: "1px solid " + forecast.color + "40" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 22 }}>{forecast.emoji}</span>
+            <div>
+              <p style={{ fontSize: 10, color: forecast.color, letterSpacing: "0.15em", margin: 0, fontWeight: 700 }}>TODAY'S SKIN FORECAST</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#2C2C2C", margin: 0 }}>{forecast.label}</p>
+            </div>
+          </div>
+          <div style={{ background: levelColor, borderRadius: 20, padding: "3px 10px" }}>
+            <span style={{ fontSize: 11, color: "#fff", fontWeight: 700 }}>{levelLabel}</span>
+          </div>
+        </div>
+        <p style={{ fontSize: 12, color: "#666", lineHeight: 1.6, margin: 0 }}>{forecast.advice}</p>
+      </div>
       <div style={s.homeTop}>
         <p style={s.eyebrow}>今の肌、ちゃんと見てる？</p>
         <h1 style={s.title}>撮るだけで<br /><em style={s.titleEm}>崩れケア</em>がわかる</h1>
@@ -331,7 +322,7 @@ function PreviewScreen({ image, onAnalyze, onRetake }) {
         {image
           ? <img src={image} alt="撮影した肌" style={s.img} />
           : <div style={s.noImg}>
-              <span style={{ fontSize: 40 }}>🧖‍♀️</span>
+              <span style={{ fontSize: 40 }}>🧖</span>
               <p style={{ color: C.muted, fontSize: 13, margin: "8px 0 0" }}>外回り帰りOLの肌を想定して診断します</p>
             </div>
         }
@@ -369,9 +360,7 @@ function ResultScreen({ result, onReset }) {
     if (!cardRef.current) return;
     setSaving(true);
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: "#F3EADD", scale: 2, useCORS: true,
-      });
+      const canvas = await html2canvas(cardRef.current, { backgroundColor: "#F3EADD", scale: 2, useCORS: true });
       const link = document.createElement("a");
       link.download = `nuance-palette-${Date.now()}.png`;
       link.href = canvas.toDataURL("image/png");
@@ -390,14 +379,7 @@ function ResultScreen({ result, onReset }) {
         {result.recommendations.map((rec, i) => {
           const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
           return (
-            <div key={i} style={{
-              position: "absolute", left: rec.x + "%", top: rec.y + "%",
-              transform: "translate(-50%, -50%)",
-              width: 28, height: 28, borderRadius: "50%",
-              background: item.color, border: "2px solid white",
-              boxShadow: "0 2px 8px rgba(0,0,0,.2)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13,
-            }}>
+            <div key={i} style={{ position: "absolute", left: rec.x + "%", top: rec.y + "%", transform: "translate(-50%, -50%)", width: 28, height: 28, borderRadius: "50%", background: item.color, border: "2px solid white", boxShadow: "0 2px 8px rgba(0,0,0,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>
               {rec.priority}
             </div>
           );
@@ -421,10 +403,7 @@ function ResultScreen({ result, onReset }) {
             const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
             const isOpen = open === i;
             return (
-              <div key={i}
-                style={{ ...s.card, borderColor: isOpen ? item.color : C.border, background: isOpen ? item.color + "15" : "#fff" }}
-                onClick={() => setOpen(isOpen ? null : i)}
-              >
+              <div key={i} style={{ ...s.card, borderColor: isOpen ? item.color : C.border, background: isOpen ? item.color + "15" : "#fff" }} onClick={() => setOpen(isOpen ? null : i)}>
                 <div style={s.cardRow}>
                   <div style={{ ...s.cardIcon, background: item.color }}>
                     <span style={{ fontSize: 18 }}>{item.emoji}</span>
@@ -434,8 +413,7 @@ function ResultScreen({ result, onReset }) {
                     <span style={s.cardName}>{item.name}</span>
                     <span style={s.cardDesc}>{item.desc}</span>
                   </div>
-                  <span style={{ ...s.arrow, transform: isOpen ? "rotate(90deg)" : "none" }}>›</span>
-                </div>
+                  <span style={{ ...s.arrow, transform: isOpen ? "rotate(90deg)" : "none" }}>›</span>                </div>
                 {isOpen && (
                   <div style={s.cardBody}>
                     <div style={s.areaTag}>📍 {rec.area}</div>
@@ -461,28 +439,23 @@ function HistoryScreen({ history, onBack }) {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedEntry, setSelectedEntry] = useState(null);
 
-  // カレンダー用：その月に診断した日付セット
   const year = calendarDate.getFullYear();
   const month = calendarDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
   const diagnosedDays = new Set(
-    history
-      .filter(h => {
-        const d = new Date(h.date);
-        return d.getFullYear() === year && d.getMonth() === month;
-      })
-      .map(h => new Date(h.date).getDate())
+    history.filter(h => {
+      const d = new Date(h.date);
+      return d.getFullYear() === year && d.getMonth() === month;
+    }).map(h => new Date(h.date).getDate())
   );
 
   const prevMonth = () => setCalendarDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCalendarDate(new Date(year, month + 1, 1));
-
-  const entriesForDay = (day) =>
-    history.filter(h => {
-      const d = new Date(h.date);
-      return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
-    });
+  const entriesForDay = (day) => history.filter(h => {
+    const d = new Date(h.date);
+    return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+  });
 
   return (
     <div style={s.page}>
@@ -490,8 +463,6 @@ function HistoryScreen({ history, onBack }) {
         <button onClick={onBack} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: C.muted }}>←</button>
         <h2 style={{ ...s.subtitle, margin: 0 }}>使用履歴</h2>
       </div>
-
-      {/* カレンダー */}
       <div style={{ background: C.surface, borderRadius: 16, padding: 16, border: "1px solid " + C.border }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <button onClick={prevMonth} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.muted }}>‹</button>
@@ -507,15 +478,8 @@ function HistoryScreen({ history, onBack }) {
             const day = i + 1;
             const hasDiag = diagnosedDays.has(day);
             return (
-              <div key={day}
-                onClick={() => hasDiag && setSelectedEntry(entriesForDay(day)[0])}
-                style={{
-                  fontSize: 12, padding: "6px 0", borderRadius: 8, cursor: hasDiag ? "pointer" : "default",
-                  background: hasDiag ? C.skinLight : "transparent",
-                  color: hasDiag ? C.skin : C.text, fontWeight: hasDiag ? 700 : 400,
-                  position: "relative",
-                }}
-              >
+              <div key={day} onClick={() => hasDiag && setSelectedEntry(entriesForDay(day)[0])}
+                style={{ fontSize: 12, padding: "6px 0", borderRadius: 8, cursor: hasDiag ? "pointer" : "default", background: hasDiag ? C.skinLight : "transparent", color: hasDiag ? C.skin : C.text, fontWeight: hasDiag ? 700 : 400 }}>
                 {day}
                 {hasDiag && <div style={{ width: 4, height: 4, borderRadius: "50%", background: C.skin, margin: "2px auto 0" }} />}
               </div>
@@ -523,8 +487,6 @@ function HistoryScreen({ history, onBack }) {
           })}
         </div>
       </div>
-
-      {/* 選択した日の詳細 */}
       {selectedEntry && (
         <div style={{ background: C.skinPale, borderRadius: 14, padding: 16 }}>
           <p style={{ fontSize: 11, color: C.muted, margin: "0 0 8px" }}>
@@ -538,14 +500,11 @@ function HistoryScreen({ history, onBack }) {
           </div>
         </div>
       )}
-
-      {/* 履歴リスト */}
       <div style={{ ...s.divRow }}>
         <div style={s.divLine} />
         <span style={s.divLabel}>すべての履歴</span>
         <div style={s.divLine} />
       </div>
-
       {history.length === 0 ? (
         <p style={{ color: C.muted, fontSize: 13, textAlign: "center" }}>まだ履歴がありません</p>
       ) : (
