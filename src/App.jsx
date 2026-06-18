@@ -104,13 +104,48 @@ const MOCK_RESULTS = [
 ];
 
 function getSkinForecast() {
-  const month = new Date().getMonth() + 1;
-  if (month >= 6 && month <= 8) return { emoji: "☀️", label: "高温多湿・汗テカリ注意", level: "high", advice: "汗と皮脂でメイクが崩れやすい季節。毛穴ぼかしパウダーを先にポーチに入れて", color: "#FF8C42", bg: "#FFF3E8" };
-  if (month >= 3 && month <= 5) return { emoji: "🌸", label: "花粉・湿度変化に注意", level: "mid", advice: "花粉で肌がゆらぎやすい時期。潤いバームで肌バリアを整えてから外出を", color: "#E8A0BF", bg: "#FFF0F5" };
-  if (month >= 9 && month <= 11) return { emoji: "🍂", label: "乾燥はじまり・保湿ケアを", level: "mid", advice: "朝晩の乾燥が急に進む季節。潤いバームをいつもより多めにのせて", color: "#C4987A", bg: "#FDF3EC" };
-  return { emoji: "❄️", label: "極乾燥・保湿必須", level: "high", advice: "空気が乾燥しきってる時期。ヨレ補正クリームで崩れ予防しながら保湿も忘れずに", color: "#7BA7CC", bg: "#EEF5FC" };
-}
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const hour = now.getHours();
+  const time = hour < 6 ? "night" : hour < 10 ? "morning" : hour < 14 ? "noon" : hour < 18 ? "afternoon" : "evening";
 
+  const base = month >= 6 && month <= 8 ? "summer" :
+               month >= 3 && month <= 5 ? "spring" :
+               month >= 9 && month <= 11 ? "autumn" : "winter";
+
+  const map = {
+    summer: {
+      morning:   { emoji: "🌅", label: "蒸し暑い朝・崩れ予防を", level: "mid", advice: "今日も湿度高め。ベース前に毛穴ぼかしパウダーを仕込んで崩れにくくして", color: "#FF8C42", bg: "#FFF3E8" },
+      noon:      { emoji: "☀️", label: "真夏の昼・テカリMAX", level: "high", advice: "紫外線と汗でメイクが限界に。毛穴ぼかしパウダーで今すぐオフして", color: "#FF6B35", bg: "#FFF0E8" },
+      afternoon: { emoji: "🔥", label: "夕方テカリのピーク", level: "high", advice: "皮脂が一番出る時間帯。ティッシュオフ→パウダーの順でリセットして", color: "#FF8C42", bg: "#FFF3E8" },
+      evening:   { emoji: "🌆", label: "夜も蒸し暑い・ベタつき注意", level: "mid", advice: "夜でも湿度が高い季節。軽めに毛穴ぼかしパウダーで整えて", color: "#E8A042", bg: "#FFF5E8" },
+      night:     { emoji: "🌙", label: "深夜ケアで明日に備えて", level: "low", advice: "今夜はしっかり洗顔。夏の皮脂汚れをきちんと落として明日の肌を整えて", color: "#9E9E9E", bg: "#F5F5F5" },
+    },
+    spring: {
+      morning:   { emoji: "🌸", label: "花粉の朝・肌バリアを", level: "mid", advice: "外出前に潤いバームで肌バリアを作って。花粉が刺激になりにくくなるよ", color: "#E8A0BF", bg: "#FFF0F5" },
+      noon:      { emoji: "🌼", label: "春の昼・乾燥と花粉に注意", level: "mid", advice: "空気が乾いてきたら潤いバームを少量。肌をやさしく整えて", color: "#E8A0BF", bg: "#FFF0F5" },
+      afternoon: { emoji: "🌤️", label: "花粉ピーク時間帯", level: "high", advice: "15〜17時は花粉が多い時間。目元・鼻まわりを触らずに潤いバームでケアして", color: "#D4897A", bg: "#FDF0EC" },
+      evening:   { emoji: "🌇", label: "帰宅後すぐにケアを", level: "mid", advice: "外から帰ったら花粉をオフ。潤いバームで赤くなった部分をなだめて", color: "#E8A0BF", bg: "#FFF0F5" },
+      night:     { emoji: "🌙", label: "春の夜・保湿で肌を回復", level: "low", advice: "花粉で荒れた肌をやさしくケア。今夜は潤いバームをたっぷりなじませて", color: "#9E9E9E", bg: "#F5F5F5" },
+    },
+    autumn: {
+      morning:   { emoji: "🍂", label: "秋の朝・乾燥チェックを", level: "mid", advice: "朝の乾燥が一番きつい季節。洗顔後すぐに潤いバームで保湿して", color: "#C4987A", bg: "#FDF3EC" },
+      noon:      { emoji: "🌾", label: "日中も乾燥が進んでる", level: "mid", advice: "エアコンで乾燥しやすい時間帯。潤いバームを少量のせてツヤを復活させて", color: "#C4987A", bg: "#FDF3EC" },
+      afternoon: { emoji: "🍁", label: "夕方の乾燥・ヨレ注意", level: "high", advice: "乾燥でファンデが浮いてきやすい時間。ヨレ補正クリームでなめらかに整えて", color: "#C4987A", bg: "#FDF3EC" },
+      evening:   { emoji: "🌃", label: "夜風で肌が冷えてくる", level: "mid", advice: "気温が下がると乾燥が加速。帰宅したら潤いバームで肌を温めて", color: "#B08060", bg: "#FDF5EC" },
+      night:     { emoji: "🌙", label: "秋の夜・保湿ナイトケアを", level: "low", advice: "今夜は化粧水の後に潤いバームを重ねて。翌朝の肌が全然違うよ", color: "#9E9E9E", bg: "#F5F5F5" },
+    },
+    winter: {
+      morning:   { emoji: "❄️", label: "冬の朝・極乾燥注意", level: "high", advice: "起き抜けの肌は水分ゼロ。洗顔後すぐに潤いバームを全顔になじませて", color: "#7BA7CC", bg: "#EEF5FC" },
+      noon:      { emoji: "🌨️", label: "日中も乾燥が続いてる", level: "high", advice: "暖房で室内も乾燥MAX。潤いバームを少量のせてくすみと乾燥を同時にケア", color: "#7BA7CC", bg: "#EEF5FC" },
+      afternoon: { emoji: "🌬️", label: "寒風でヨレ・乾燥注意", level: "high", advice: "冷たい風でメイクが乾いて崩れやすい。ヨレ補正クリームで整えてから外出を", color: "#7BA7CC", bg: "#EEF5FC" },
+      evening:   { emoji: "🌆", label: "夕方の冷え・肌が固まる", level: "mid", advice: "寒さで肌が硬くなってきたら、指で温めながら潤いバームをなじませて", color: "#7BA7CC", bg: "#EEF5FC" },
+      night:     { emoji: "🌙", label: "冬の夜・徹底保湿を", level: "low", advice: "今夜は特に保湿を念入りに。潤いバームをたっぷり使って翌朝に備えて", color: "#9E9E9E", bg: "#F5F5F5" },
+    },
+  };
+
+  return map[base][time];
+}
 const C = {
   bg: "#FAF8F5", surface: "#FFF", border: "#EDE5DE",
   skin: "#C4987A", skinLight: "#E8DDD4", skinPale: "#F5EDE8",
