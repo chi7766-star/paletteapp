@@ -21,7 +21,6 @@ const MOCK_RESULTS = [
       { itemId: "balm",       priority: 3, area: "目元・口元",           how: "乾燥が気になる部分に少量のせてツヤを復活させて", x: 50, y: 70 },
     ],
   },
-
   {
     skinCondition: "乾燥でくすみが出やすいタイミング",
     concerns: ["頬の乾燥・粉っぽさ", "くすんで見える", "口元のよれ"],
@@ -40,6 +39,66 @@ const MOCK_RESULTS = [
       { itemId: "tone",       priority: 1, area: "赤みが出やすい頬",       how: "コンシーラー感覚で薄く重ねて色ムラをトーンダウン", x: 28, y: 50 },
       { itemId: "powder",     priority: 2, area: "鼻・毛穴が気になる部分", how: "毛穴をぼかすようにブラシでくるくると軽くのせる", x: 50, y: 60 },
       { itemId: "correction", priority: 3, area: "全体",                   how: "仕上げに指でさっとなじませてメイクをまとめる", x: 50, y: 80 },
+    ],
+  },
+  {
+    skinCondition: "花粉で肌がゆらいでる春の悩み",
+    concerns: ["目元・鼻まわりの赤み", "こすって荒れた頬", "くすんで顔色が悪い"],
+    message: "触りすぎが一番のダメージ。やさしくリセットして",
+    recommendations: [
+      { itemId: "balm",       priority: 1, area: "目元・鼻まわり",       how: "刺激を与えず指の腹でそっとなじませて赤みをやわらげて", x: 50, y: 45 },
+      { itemId: "tone",       priority: 2, area: "頬・顔全体",           how: "くすみと赤みを同時にカバー。薄く重ねるのがポイント", x: 30, y: 55 },
+      { itemId: "correction", priority: 3, area: "荒れが気になる部分",   how: "ベースのヨレをやさしく整えて、肌を均一に見せて", x: 65, y: 55 },
+    ],
+  },
+  {
+    skinCondition: "汗と皮脂でメイクが限界な夏肌",
+    concerns: ["汗でドロドロに崩れた", "テカリが止まらない", "化粧が厚ぼったく見える"],
+    message: "全部落としたい気持ちはわかる。でもこれで乗り切れる",
+    recommendations: [
+      { itemId: "powder",     priority: 1, area: "顔全体・特にTゾーン",   how: "余分な皮脂と汗をオフ。ティッシュで軽くおさえてからのせると◎", x: 50, y: 35 },
+      { itemId: "correction", priority: 2, area: "崩れが目立つ頬・あご", how: "汗で浮いたベースをなめらかに整えて密着させる", x: 30, y: 60 },
+      { itemId: "tone",       priority: 3, area: "くすんで見える部分",   how: "疲れた印象をトーンアップ。薄く重ねるだけで顔色が変わる", x: 65, y: 40 },
+    ],
+  },
+  {
+    skinCondition: "秋の乾燥、じわじわ肌に出てきてる",
+    concerns: ["頬がかさついてきた", "ファンデが浮いてくる", "目元に小じわが目立つ"],
+    message: "季節の変わり目、肌は正直。今日だけでも潤いチャージを",
+    recommendations: [
+      { itemId: "balm",       priority: 1, area: "頬・目元・口元",       how: "乾燥した部分に薄くなじませて、うるおいの膜をつくるイメージで", x: 35, y: 50 },
+      { itemId: "correction", priority: 2, area: "ファンデが浮いた部分", how: "浮いたベースを押さえながらなめらかに密着させる", x: 60, y: 55 },
+      { itemId: "powder",     priority: 3, area: "小鼻・あご",           how: "乾燥しやすい部分は避けて、皮脂が出るところだけに軽くのせて", x: 50, y: 65 },
+    ],
+  },
+  {
+    skinCondition: "冬の極乾燥、肌がカサカサに",
+    concerns: ["粉っぽくてファンデが浮く", "口元・目元がつっぱる", "顔色がくすんで暗い"],
+    message: "乾燥は全部のトラブルの元。まず潤いを閉じ込めて",
+    recommendations: [
+      { itemId: "balm",       priority: 1, area: "顔全体・特に乾燥部分", how: "多めに指で温めてからなじませて。潤いのベースをつくるつもりで", x: 50, y: 45 },
+      { itemId: "tone",       priority: 2, area: "くすみが出やすい頬・額", how: "血色感をプラスして冬の顔色の悪さをカバーして", x: 30, y: 35 },
+      { itemId: "correction", priority: 3, area: "口元・目元",           how: "つっぱりやすい部分のヨレをやさしく整えて仕上げる", x: 50, y: 70 },
+    ],
+  },
+  {
+    skinCondition: "デスクワーク疲れで肌がくたびれてる",
+    concerns: ["顔色が暗くくすんでいる", "目元がたるんで疲れて見える", "夕方のドロドロ崩れ"],
+    message: "画面疲れは肌にも出る。2分でリフレッシュしよう",
+    recommendations: [
+      { itemId: "tone",       priority: 1, area: "頬・目の下・額",       how: "血色が失われた部分にのせて、ぱっと明るい顔色に整えて", x: 35, y: 40 },
+      { itemId: "balm",       priority: 2, area: "目元・口元",           how: "乾燥でくすんだ部分にツヤをプラス。疲れた印象がやわらぐ", x: 50, y: 65 },
+      { itemId: "correction", priority: 3, area: "崩れが目立つ部分",     how: "夕方の崩れをさっとリセット。指でなじませるだけでOK", x: 65, y: 55 },
+    ],
+  },
+  {
+    skinCondition: "大事な予定前、肌を完璧に整えたい",
+    concerns: ["テカリで化粧が崩れてきた", "毛穴が目立ってきた", "顔色をもっと明るく見せたい"],
+    message: "あとひと手間で、もっとキレイになれる",
+    recommendations: [
+      { itemId: "powder",     priority: 1, area: "Tゾーン・毛穴が気になる部分", how: "テカリと毛穴をふんわりカバー。ブラシでくるくるとのせて", x: 50, y: 38 },
+      { itemId: "tone",       priority: 2, area: "頬骨・目の下",               how: "顔の高い部分にのせて立体感と明るさをプラスして", x: 30, y: 48 },
+      { itemId: "balm",       priority: 3, area: "目元・唇",                   how: "ツヤをのせてイキイキとした印象に。少量でOK", x: 50, y: 68 },
     ],
   },
 ];
@@ -103,7 +162,7 @@ const s = {
   divLine: { flex: 1, height: 1, background: C.border },
   divLabel: { fontSize: 10, letterSpacing: "0.16em", color: C.skin, textTransform: "uppercase", whiteSpace: "nowrap" },
   cards: { display: "flex", flexDirection: "column", gap: 10 },
-  card: { borderRadius: 14, padding: 16, border: "1.5px solid", cursor: "pointer", transition: "all .2s" },
+  card: { borderRadius: 14, padding: 16, border: "1.5px solid", cursor: "pointer", traansition: "all .2s" },
   cardRow: { display: "flex", alignItems: "center", gap: 12 },
   cardIcon: { width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   cardMeta: { flex: 1, display: "flex", flexDirection: "column", gap: 2 },
@@ -160,11 +219,12 @@ export default function PaletteApp() {
     }, 1800);
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     if (phase === "splash") {
       setTimeout(() => setPhase("home"), 2500);
     }
   }, [phase]);
+
   const reset = () => {
     setPhase("home");
     setImageData(null);
@@ -182,7 +242,7 @@ export default function PaletteApp() {
         <span style={s.logoSub}>palette</span>
       </header>
       <main style={s.main}>
-      {phase === "splash" && <SplashScreen />}
+        {phase === "splash" && <SplashScreen />}
         {phase === "home"      && <HomeScreen onCapture={() => fileInputRef.current.click()} onSkip={goToPreview} />}
         {phase === "preview"   && <PreviewScreen image={imageData} onAnalyze={analyze} onRetake={() => fileInputRef.current.click()} />}
         {phase === "analyzing" && <AnalyzingScreen />}
@@ -210,6 +270,7 @@ function SplashScreen() {
     </div>
   );
 }
+
 function HomeScreen({ onCapture, onSkip }) {
   return (
     <div style={s.page}>
@@ -300,27 +361,27 @@ function ResultScreen({ result, onReset }) {
 
   return (
     <div style={s.page}>
-              <div style={{ position: "relative", width: "70%", margin: "0 auto", marginBottom: 20 }}>
-          <img src={face} alt="face" style={{ width: "100%", display: "block" }} />
-          {result.recommendations.map((rec, i) => {
-            const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
-            return (
-              <div key={i} style={{
-                position: "absolute",
-                left: rec.x + "%", top: rec.y + "%",
-                transform: "translate(-50%, -50%)",
-                width: 28, height: 28, borderRadius: "50%",
-                background: item.color,
-                border: "2px solid white",
-                boxShadow: "0 2px 8px rgba(0,0,0,.2)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 13,
-              }}>
-                {rec.priority}
-              </div>
-            );
-          })}
-        </div>
+      <div style={{ position: "relative", width: "70%", margin: "0 auto", marginBottom: 20 }}>
+        <img src={face} alt="face" style={{ width: "100%", display: "block" }} />
+        {result.recommendations.map((rec, i) => {
+          const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
+          return (
+            <div key={i} style={{
+              position: "absolute",
+              left: rec.x + "%", top: rec.y + "%",
+              transform: "translate(-50%, -50%)",
+              width: 28, height: 28, borderRadius: "50%",
+              background: item.color,
+              border: "2px solid white",
+              boxShadow: "0 2px 8px rgba(0,0,0,.2)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 13,
+            }}>
+              {rec.priority}
+            </div>
+          );
+        })}
+      </div>
       <div ref={cardRef} style={s.saveArea}>
         <div style={s.badge}>
           <span style={s.badgeText}>{result.skinCondition}</span>
@@ -368,7 +429,6 @@ function ResultScreen({ result, onReset }) {
         </div>
         <p style={s.saveFooter}>nuance palette — 肌悩み診断</p>
       </div>
-
       <button style={s.saveBtn} onClick={handleSave} disabled={saving}>
         <span>{saving ? "⏳" : "📥"}</span>
         <span>{saving ? "保存中..." : "診断結果を画像保存"}</span>
