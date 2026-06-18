@@ -111,7 +111,7 @@ const C = {
 
 const s = {
   root: { minHeight: "100vh", background: C.bg, fontFamily: "'Noto Sans JP',sans-serif", color: C.text, maxWidth: 430, margin: "0 auto" },
-  header: { padding: "18px 24px 14px", borderBottom: "1px solid " + C.border, background: C.surface, display: "flex", alignItems: "baseline", gap: 6 },
+  header: { padding: "18px 24px 14px", borderBottom: "1px solid " + C.border, background: C.surface, display: "flex", alignItems: "center", justifyContent: "space-between" },
   logo: { fontSize: 20, fontWeight: 700, letterSpacing: "0.12em", color: C.skin, fontFamily: "Georgia,serif" },
   logoSub: { fontSize: 11, letterSpacing: "0.2em", color: C.muted, textTransform: "uppercase" },
   main: { padding: "0 0 48px" },
@@ -143,6 +143,10 @@ const s = {
     background: "#fff", color: C.skin, fontSize: 15, fontWeight: 700, cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
   },
+  historyBtn: {
+    padding: "8px 14px", borderRadius: 20, border: "1.5px solid " + C.border,
+    background: "transparent", color: C.muted, fontSize: 12, cursor: "pointer",
+  },
   hint: { fontSize: 11, color: C.muted, textAlign: "center", margin: 0 },
   imgFrame: { borderRadius: 20, overflow: "hidden", background: C.skinPale, aspectRatio: "3/4", position: "relative" },
   img: { width: "100%", height: "100%", objectFit: "cover" },
@@ -162,7 +166,7 @@ const s = {
   divLine: { flex: 1, height: 1, background: C.border },
   divLabel: { fontSize: 10, letterSpacing: "0.16em", color: C.skin, textTransform: "uppercase", whiteSpace: "nowrap" },
   cards: { display: "flex", flexDirection: "column", gap: 10 },
-  card: { borderRadius: 14, padding: 16, border: "1.5px solid", cursor: "pointer", traansition: "all .2s" },
+  card: { borderRadius: 14, padding: 16, border: "1.5px solid", cursor: "pointer", transition: "all .2s" },
   cardRow: { display: "flex", alignItems: "center", gap: 12 },
   cardIcon: { width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   cardMeta: { flex: 1, display: "flex", flexDirection: "column", gap: 2 },
@@ -177,10 +181,21 @@ const s = {
   saveFooter: { textAlign: "center", fontSize: 10, color: C.muted, letterSpacing: "0.15em", marginTop: 8 },
 };
 
+// 履歴をlocalStorageに保存・取得
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem("nuance_history") || "[]");
+  } catch { return []; }
+}
+function saveHistory(history) {
+  localStorage.setItem("nuance_history", JSON.stringify(history));
+}
+
 export default function PaletteApp() {
   const [phase, setPhase] = useState("splash");
   const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
+  const [history, setHistory] = useState(loadHistory);
   const fileInputRef = useRef(null);
 
   const handleImageSelect = useCallback((e) => {
@@ -215,6 +230,16 @@ export default function PaletteApp() {
     setTimeout(() => {
       const mock = MOCK_RESULTS[Math.floor(Math.random() * MOCK_RESULTS.length)];
       setResult(mock);
+      // 履歴に追加
+      const newEntry = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        skinCondition: mock.skinCondition,
+        concerns: mock.concerns,
+      };
+      const newHistory = [newEntry, ...loadHistory()].slice(0, 50);
+      saveHistory(newHistory);
+      setHistory(newHistory);
       setPhase("result");
     }, 1800);
   }, []);
@@ -238,15 +263,21 @@ export default function PaletteApp() {
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
       `}</style>
       <header style={s.header}>
-        <span style={s.logo}>nuance</span>
-        <span style={s.logoSub}>palette</span>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+          <span style={s.logo}>nuance</span>
+          <span style={s.logoSub}>palette</span>
+        </div>
+        {phase !== "splash" && (
+          <button style={s.historyBtn} onClick={() => setPhase("history")}>履歴</button>
+        )}
       </header>
       <main style={s.main}>
-        {phase === "splash" && <SplashScreen />}
-        {phase === "home"      && <HomeScreen onCapture={() => fileInputRef.current.click()} onSkip={goToPreview} />}
-        {phase === "preview"   && <PreviewScreen image={imageData} onAnalyze={analyze} onRetake={() => fileInputRef.current.click()} />}
-        {phase === "analyzing" && <AnalyzingScreen />}
-        {phase === "result"    && result && <ResultScreen result={result} onReset={reset} />}
+        {phase === "splash"   && <SplashScreen />}
+        {phase === "home"     && <HomeScreen onCapture={() => fileInputRef.current.click()} onSkip={goToPreview} />}
+        {phase === "preview"  && <PreviewScreen image={imageData} onAnalyze={analyze} onRetake={() => fileInputRef.current.click()} />}
+        {phase === "analyzing"&& <AnalyzingScreen />}
+        {phase === "result"   && result && <ResultScreen result={result} onReset={reset} />}
+        {phase === "history"  && <HistoryScreen history={history} onBack={() => setPhase("home")} />}
       </main>
       <input ref={fileInputRef} type="file" accept="image/*" capture="user" onChange={handleImageSelect} style={{ display: "none" }} />
     </div>
@@ -256,16 +287,11 @@ export default function PaletteApp() {
 function SplashScreen() {
   return (
     <div style={{
-      position: "fixed", inset: 0,
-      background: "#EDE5DC",
+      position: "fixed", inset: 0, background: "#EDE5DC",
       display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      zIndex: 9999,
+      alignItems: "center", justifyContent: "center", zIndex: 9999,
     }}>
-      <img src={logo} alt="Re:Touch" style={{ 
-        width: "80%", maxWidth: 320,
-        animation: "fadeIn 1.5s ease-in-out",
-      }} />
+      <img src={logo} alt="nuance palette" style={{ width: "80%", maxWidth: 320, animation: "fadeIn 1.5s ease-in-out" }} />
       <style>{`@keyframes fadeIn { from{opacity:0} to{opacity:1} }`}</style>
     </div>
   );
@@ -344,9 +370,7 @@ function ResultScreen({ result, onReset }) {
     setSaving(true);
     try {
       const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: "#F3EADD",
-        scale: 2,
-        useCORS: true,
+        backgroundColor: "#F3EADD", scale: 2, useCORS: true,
       });
       const link = document.createElement("a");
       link.download = `nuance-palette-${Date.now()}.png`;
@@ -367,15 +391,12 @@ function ResultScreen({ result, onReset }) {
           const item = PALETTE_ITEMS[rec.itemId] || PALETTE_ITEMS.balm;
           return (
             <div key={i} style={{
-              position: "absolute",
-              left: rec.x + "%", top: rec.y + "%",
+              position: "absolute", left: rec.x + "%", top: rec.y + "%",
               transform: "translate(-50%, -50%)",
               width: 28, height: 28, borderRadius: "50%",
-              background: item.color,
-              border: "2px solid white",
+              background: item.color, border: "2px solid white",
               boxShadow: "0 2px 8px rgba(0,0,0,.2)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 13,
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13,
             }}>
               {rec.priority}
             </div>
@@ -383,9 +404,7 @@ function ResultScreen({ result, onReset }) {
         })}
       </div>
       <div ref={cardRef} style={s.saveArea}>
-        <div style={s.badge}>
-          <span style={s.badgeText}>{result.skinCondition}</span>
-        </div>
+        <div style={s.badge}><span style={s.badgeText}>{result.skinCondition}</span></div>
         <div style={{ ...s.pillRow, marginTop: 16 }}>
           {result.concerns.map((c, i) => (
             <div key={i} style={s.pill}><span style={s.pillDot} />{c}</div>
@@ -434,6 +453,118 @@ function ResultScreen({ result, onReset }) {
         <span>{saving ? "保存中..." : "診断結果を画像保存"}</span>
       </button>
       <button style={s.primaryBtn} onClick={onReset}>もう一度診断する</button>
+    </div>
+  );
+}
+
+function HistoryScreen({ history, onBack }) {
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedEntry, setSelectedEntry] = useState(null);
+
+  // カレンダー用：その月に診断した日付セット
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  const diagnosedDays = new Set(
+    history
+      .filter(h => {
+        const d = new Date(h.date);
+        return d.getFullYear() === year && d.getMonth() === month;
+      })
+      .map(h => new Date(h.date).getDate())
+  );
+
+  const prevMonth = () => setCalendarDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCalendarDate(new Date(year, month + 1, 1));
+
+  const entriesForDay = (day) =>
+    history.filter(h => {
+      const d = new Date(h.date);
+      return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+    });
+
+  return (
+    <div style={s.page}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: C.muted }}>←</button>
+        <h2 style={{ ...s.subtitle, margin: 0 }}>使用履歴</h2>
+      </div>
+
+      {/* カレンダー */}
+      <div style={{ background: C.surface, borderRadius: 16, padding: 16, border: "1px solid " + C.border }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <button onClick={prevMonth} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.muted }}>‹</button>
+          <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{year}年{month + 1}月</span>
+          <button onClick={nextMonth} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.muted }}>›</button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, textAlign: "center" }}>
+          {["日","月","火","水","木","金","土"].map(d => (
+            <div key={d} style={{ fontSize: 10, color: C.muted, paddingBottom: 4 }}>{d}</div>
+          ))}
+          {Array(firstDay).fill(null).map((_, i) => <div key={"e"+i} />)}
+          {Array(daysInMonth).fill(null).map((_, i) => {
+            const day = i + 1;
+            const hasDiag = diagnosedDays.has(day);
+            return (
+              <div key={day}
+                onClick={() => hasDiag && setSelectedEntry(entriesForDay(day)[0])}
+                style={{
+                  fontSize: 12, padding: "6px 0", borderRadius: 8, cursor: hasDiag ? "pointer" : "default",
+                  background: hasDiag ? C.skinLight : "transparent",
+                  color: hasDiag ? C.skin : C.text, fontWeight: hasDiag ? 700 : 400,
+                  position: "relative",
+                }}
+              >
+                {day}
+                {hasDiag && <div style={{ width: 4, height: 4, borderRadius: "50%", background: C.skin, margin: "2px auto 0" }} />}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 選択した日の詳細 */}
+      {selectedEntry && (
+        <div style={{ background: C.skinPale, borderRadius: 14, padding: 16 }}>
+          <p style={{ fontSize: 11, color: C.muted, margin: "0 0 8px" }}>
+            {new Date(selectedEntry.date).toLocaleDateString("ja-JP", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+          </p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: C.skin, margin: "0 0 8px" }}>{selectedEntry.skinCondition}</p>
+          <div style={s.pillRow}>
+            {selectedEntry.concerns.map((c, i) => (
+              <div key={i} style={s.pill}><span style={s.pillDot} />{c}</div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 履歴リスト */}
+      <div style={{ ...s.divRow }}>
+        <div style={s.divLine} />
+        <span style={s.divLabel}>すべての履歴</span>
+        <div style={s.divLine} />
+      </div>
+
+      {history.length === 0 ? (
+        <p style={{ color: C.muted, fontSize: 13, textAlign: "center" }}>まだ履歴がありません</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {history.map(entry => (
+            <div key={entry.id} style={{ background: C.surface, borderRadius: 12, padding: "12px 16px", border: "1px solid " + C.border }}>
+              <p style={{ fontSize: 11, color: C.muted, margin: "0 0 4px" }}>
+                {new Date(entry.date).toLocaleDateString("ja-JP", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: C.skin, margin: "0 0 6px" }}>{entry.skinCondition}</p>
+              <div style={s.pillRow}>
+                {entry.concerns.map((c, i) => (
+                  <div key={i} style={s.pill}><span style={s.pillDot} />{c}</div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
